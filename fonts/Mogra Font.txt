@@ -1,0 +1,15 @@
+Mogra Font
+
+html
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mogra&display=swap" rel="stylesheet">
+
+css
+
+.mogra-regular {
+  font-family: "Mogra", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
