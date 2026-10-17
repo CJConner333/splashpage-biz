@@ -6,9 +6,9 @@
 
   <title>Splash Page</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mogra&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mogra&family=Momo+Signature&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="./styles.css">
 </head>
@@ -24,10 +24,18 @@
       </div>
 
        <div class="nav__links">
-          <a href="#Pricing" class="nav__link">Pricing</a>
-          <a href="#" class="nav__link nav__link--primary">Customer Support</a>
+          <a href="#pricing" class="nav__link">Pricing</a>
+          <button
+            type="button" 
+            class="nav__link nav__link--primary" 
+            data-open="modal"
+            aria-controls="modal"
+            aria-expanded="false">
+            Customer Support</button/>
        </div>
     </nav>
+
+
   
   <header>
     <div class="header__container">
@@ -49,6 +57,86 @@
   </section>
   </header>
 
+  <!-- /* Modal */ -->
+
+  <section id="modal"
+  <div class="modal" id="modal" role="dialog" aria-modal="true"
+       aria-hidden="true" aria-labelledby="modal-title">
+    <div class="modal__overlay" data-close></div>
+
+    <div class="modal__dialog" role="document" tabindex="-1">
+      <header class="modal__header">
+        <h2 id="modal-title">Send us a message</h2>
+        <button class="modal__close" aria-label="Close" data-close>&times;</button>
+      </header>
+
+      <form id="modalForm" class="modal__form" novalidate>
+        <div class="form-row">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" required />
+        </div>
+
+        <div class="form-row">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" required />
+        </div>
+
+        <div class="form-row">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="4" required></textarea>
+        </div>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+          <button type="submit" class="btn">Send</button>
+        </div>
+
+        <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+  </section>
+
+  <section id="easy">
+  <div class="container">
+    <div class="row">
+      <h2 class="section__title">Easy Peasy Lemon Squeezy!</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step__number">
+            <img src="./assets/1-solid-full.svg" alt="Step 1">
+          </div>
+          <div class="step__para">
+            <p>Select your package and place your deposit</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step__number">
+            <img src="./assets/2-solid-full.svg" alt="Step 2">
+          </div>
+          <div class="step__para">
+            <p>Send your logo, color, and style preferences</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step__number">
+            <img src="./assets/3-solid-full.svg" alt="Step 3">
+          </div>
+          <div class="step__para">
+            <p>Finalize, approve, and go live with your Splash Page</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
   <section id="pricing">
     <div class="container">
         <div class="row">
@@ -59,39 +147,38 @@
               <div class="package__stripe"></div>
               <div class="package__top">
                 <div class="package__name">Standard</div>
-                <div class="package__price">$250.00</div>
+                <div class="package__price">$350</div>
               </div>
               <div class="package__middle">
                   <p class="package__feature">Search Optimized Splash Page</p>
                   <p class="package__feature">Custom Contact Form</p>
-                  <p class="package__feature">Use your own Logo</p>
-                  <p class="package__feature">Install on your own</p>
+                  <p class="package__feature">Use Your Own Logo</p>
+                  <p class="package__feature">Install On Your Own</p>
               </div>
               <div class="package__bottom">
                 <button class="package__button">buy now</button>
               </div>
             </div>
 
-          <div class="packages">
             <div class="package">
               <div class="package__stripe"></div>
               <div class="package__top">
                 <div class="package__name">Deluxe</div>
-                <div class="package__price">$450.00</div>
+                <div class="package__price">$650</div>
               </div>
               <div class="package__middle">
                   <p class="package__feature">Search Optimized Splash Page</p>
-                  <p class="package__feature">Your own domain name</p>
-                  <p class="package__feature">Website installation</p>
-                  <p class="package__feature">1 year of hosting</p>
-                  <p class="package__feature">Renews annually at $150</p>
+                  <p class="package__feature">Your Own Domain Name</p>
+                  <p class="package__feature">Installed Live</p>
+                  <p class="package__feature">1 Year of Hosting</p>
+                  <p class="package__feature">Renews Annually at $150</p>
               </div>
-              <div class="plan__bottom">
+              <div class="package__bottom">
                 <button class="package__button">buy now</button>
               </div>
             </div>
 
-          <div class="packages">
+          
             <div class="package">
               <div class="package__stripe"></div>
               <div class="package__top">
@@ -99,19 +186,19 @@
                 <div class="package__price">$1200</div>
               </div>
               <div class="package__middle">
-                  <p class="package__feature">Search Optimized Website</p>
-                  <p class="package__feature">Photo Gallery, Scheduling, and External Platform Integration</p>
-                  <p class="package__feature">Installed and Hosted, domain name included</p>
-                  <p class="package__feature">Renew annually for $150</p>
-                  <p class="package__feature">Perfect for scheduling, displaying work, and external platform integration</p>
-                  <p class="package__feature">Ideal for Salons, Organizations, Service Industries, and Online Store Integration</p>
+                  <p class="package__feature">Search Optimized Splash Page</p>
+                  <p class="package__feature">Your Own Domain Name</p>
+                  <p class="package__feature">Installed Live</p> 
+                  <p class="package__feature">1 Year of Hosting</p>
+                  <p class="package__feature">Renews Annually at $150</p>
+                  <p class="package__feature">Gallery, Scheduling, External Platform Integration</p>
+                  <p class="package__feature">Ideal for Salons, Restaurants, Organizations, Service Industries, and Online Store Integration</p>
               </div>
-              <div class="plan__bottom">
+              <div class="package__bottom">
                 <button class="package__button">buy now</button>
               </div>
             </div>
-
-              </div>
+          </div>
         </div>
       </div>
 </section>

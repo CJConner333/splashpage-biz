@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url(https://fonts.googleapis.com/css2?family=Mogra&family=Momo+Signature&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet);
 
 html {
   font-size: 16px;
@@ -25,6 +26,37 @@ h3 {
   font-size: 1.25em;
 }
 
+.mogra-regular {
+  font-family: "Mogra", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+.ubuntu-light {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.ubuntu-regular {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.ubuntu-medium {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.momo-signature-regular {
+  font-family: "Momo Signature", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+ 
+
 * {
   margin: 0 auto;
   padding: 0;
@@ -45,7 +77,7 @@ body {
 }
 
 .container {
-  padding: 96px 0;
+  padding: 48px 0;
 }
 
 .section {
@@ -106,11 +138,15 @@ nav {
   text-decoration: none;
   transition: all 300ms;
   margin-right: 40px;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.2rem;
 }
 
 .nav__link--primary {
   margin: 0;
-  padding: 15px 32px;
+  padding: 15px 15px;
   margin-top: 2px;
   border-radius: 9999px;
   color: #fff;
@@ -121,6 +157,111 @@ nav {
   border: none;
   width: 240px;
   transition: all 300ms ease;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.2rem;
+}
+
+/* Modal */
+
+:root{
+  --overlay-bg: rgba(0,0,0,0.5);
+  --modal-width: 520px;
+  --radius: 10px;
+  --gap: 1rem;
+  --accent: #1466f2;
+  --bg: #fff;
+}
+
+* { box-sizing: border-box; }
+body.no-scroll { overflow: hidden; }
+
+.btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: .5rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+.btn--ghost { background: transparent; color: inherit; border: 1px solid #ccc; }
+
+/* Modal base (hidden by default using aria-hidden) */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+
+/* shown state controlled by JS (adds .is-open) */
+.modal.is-open { display: flex; }
+
+/* Overlay */
+.modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(2px);
+}
+
+/* Dialog */
+.modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(calc(var(--modal-width)), 95%);
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 1rem;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+/* Header */
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.modal__close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Form */
+.modal__form { display: grid; gap: .75rem; }
+.form-row { display: flex; flex-direction: column; gap: .35rem; }
+label { font-size: .9rem; }
+input, textarea {
+  padding: .5rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font: inherit;
+}
+.modal__actions {
+  display:flex;
+  gap:.5rem;
+  justify-content: flex-end;
+  margin-top: .25rem;
+}
+
+/* feedback */
+.form-feedback { margin-top: .5rem; font-size: .95rem; color: green; }
+
+/* Small responsive tweak */
+@media (max-width: 420px) {
+  .modal__dialog { padding: .75rem; }
 }
 
 /* Video Header*/
@@ -172,12 +313,18 @@ nav {
   pointer-events: auto;
   padding: 2rem;
   text-align: center;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .header__description--para {
   margin-top: 0.5rem;
   opacity: 0.95;
   font-size: 1.3rem;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .header__description::before {
@@ -190,6 +337,65 @@ nav {
   border-radius: 20px;
 }
 
+/* Easy Steps */
+
+:root {
+  --step-gap: 1rem;
+  --step-padding: 0.75rem 1rem;
+  --step-number-size: 3.25rem;
+
+#easy .section__title {
+  font-family: "Momo Signature", cursive;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 3.25rem;
+  text-align: center;
+}
+
+.steps {
+  display: flex;
+  flex-direction: row;
+  gap: var;
+  Margin: 3rem 0;
+  max-width: 100%;
+}
+
+.step {
+  display: flex;
+  align-items: stretch;
+  gap: var(--step-gap);
+  padding: var(--step-padding);
+}
+
+.step__number {
+  align-self: stretch;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+}
+
+.step__number img {
+  width: auto;
+  max-height: 100%;
+  display: block;
+}
+
+.step__para {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.step__para p {
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
 /* Pricing */
 
 #pricing .row {
@@ -199,83 +405,173 @@ nav {
 }
 
 #pricing .section__title {
-
+  text-align: center;
 }
 
 
 .section__title {
-
+  font-size: 48px;
 }
 
 .packages {
-
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .package {
+  position: relative;
+  margin-top: 4rem;
+  display: flex;
+  width: 100%;
+  max-width: 24rem;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  background-color: rgb(255 255 255);
+  padding-left: 2rem;
+  padding-right: 2rem;
+  margin-right: 0.5rem;
+  padding-top: 0.5rem;
+  text-align:center;
+  color: rgb(26 32 44);
+  box-shadow: 
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+    rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+}
 
+.package:hover {
+  transform: translateY(-40);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .package__stripe {
-
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  height: 0.5rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 .package:nth-child(1) .package__stripe,
 .package:nth-child(1) .package__button {
-
+  color: #f7fafc;
+  background: linear-gradient(
+    115deg,
+    rgb(56, 178, 172) 0%,
+    rgb(129, 230, 217) 100%);
 } 
 
 .package:nth-child(2) {
-
+  background: linear-gradient(
+    135deg,
+    rgb(76, 81, 191) 0%,
+    rgb(102, 126, 234) 100%);
 }
 
 .package:nth-child(3) .package__stripe,
 .package:nth-child(3) .package__button {
-
+    color: #f7fafc;
+    background: linear-gradient(
+    115deg,
+    rgb(245, 101, 101) 0%,
+    rgb(254, 178, 178) 100%);
 }
 
 .package__top {
-
+  display: flex;
+  flex-direction: column;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  text-transform: uppercase;
+  line-height: 1.625;
 }
 
 .package__name {
-
+  font-size: 20px;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+  font-style: normal;
 }
 
-.package:nth-child(odd) .package__name,
+.package:nth-child(odd) .package__name
 .package:nth-child(odd) .package__price {
-
+  color: #1a202c;
 }
 
 .package__price {
+  font-size: 48px;
+  margin: 4px 0;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
 
+.package__name,
+.package__price {
+  font-weight: bold;
+  line-height: 1.625;
 }
 
 .package:nth-child(1) .package__middle,
 .package:nth-child(3) .package__middle {
-
+  border-top: 2px solid rgb(229, 231, 235);
+  border-bottom: 2px solid rgb(229, 231, 235);
 }
 
 .package:nth-child(2) .package__name,
 .package:nth-child(2) .package__price,
-.package:nth-child(2) .package__target,
-.package:nth-child(2) .package__duration,
 .package:nth-child(2) .package__feature {
-
+  color: #f7fafc;
 }
 
 .package__middle {
-
-}
-
-.package__target {
-
+  margin-left: -2rem;
+  margin-right: -2rem;
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+  padding: 2rem;
 }
 
 .package__bottom {
+  padding-left: 4rem;
+  padding-right: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
 
+.package__feature {
+  margin-top: 20px;
+  font-weight: 500;
+  color: #718096;
+  font-size: 18px;
+  line-height: 1.5;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .package__button {
-
+  border-radius: 0.25rem;
+  background-color: rgb(100 21 255);
+  padding: 0.75rem 2rem;
+  font-weight: 700;
+  color: rgb(247 250 252);
+  transition: all 300ms ease;
+  width: 100%;
+  border-radius: 9999px;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
 }
 
