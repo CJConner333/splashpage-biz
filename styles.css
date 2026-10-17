@@ -225,7 +225,7 @@ body.no-scroll { overflow: hidden; }
   gap: var(--gap);
 }
 
-/* Header */
+/* Modal Header */
 .modal__header {
   display: flex;
   align-items: center;

@@ -26,6 +26,7 @@
        <div class="nav__links">
           <a href="#pricing" class="nav__link">Pricing</a>
           <button
+            id="openModalBtn"
             type="button" 
             class="nav__link nav__link--primary" 
             data-open="modal"
@@ -57,46 +58,30 @@
   </section>
   </header>
 
-  <!-- /* Modal */ -->
+  <!-- Modal -->
+<div class="modal" id="modal" role="dialog" aria-modal="true"
+     aria-hidden="true" aria-labelledby="modal-title">
+  <div class="modal__overlay" data-close></div>
 
-  <section id="modal"
-  <div class="modal" id="modal" role="dialog" aria-modal="true"
-       aria-hidden="true" aria-labelledby="modal-title">
-    <div class="modal__overlay" data-close></div>
+  <div class="modal__dialog" role="document" tabindex="-1">
+    <header class="modal__header">
+      <h2 id="modal-title">Send us a message</h2>
+      <button class="modal__close" aria-label="Close" data-close>&times;</button>
+    </header>
 
-    <div class="modal__dialog" role="document" tabindex="-1">
-      <header class="modal__header">
-        <h2 id="modal-title">Send us a message</h2>
-        <button class="modal__close" aria-label="Close" data-close>&times;</button>
-      </header>
+    <form id="modalForm" class="modal__form" novalidate>
+      <!-- form fields... -->
+      <div class="modal__actions">
+        <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+        <button type="submit" class="btn">Send</button>
+      </div>
 
-      <form id="modalForm" class="modal__form" novalidate>
-        <div class="form-row">
-          <label for="name">Name</label>
-          <input id="name" name="name" type="text" required />
-        </div>
-
-        <div class="form-row">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" required />
-        </div>
-
-        <div class="form-row">
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="4" required></textarea>
-        </div>
-
-        <div class="modal__actions">
-          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
-          <button type="submit" class="btn">Send</button>
-        </div>
-
-        <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
-      </form>
-    </div>
+      <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
+    </form>
   </div>
+</div>
 
-  <script src="script.js" defer></script>
+  <script src="./script.js" defer></script>
   </section>
 
   <section id="easy">
