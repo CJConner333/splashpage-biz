@@ -470,9 +470,10 @@ input, textarea {
 .package:nth-child(2) {
   background: linear-gradient(
     135deg,
-    rgb(76, 81, 191) 0%,
+    rgb(11, 22, 236) 0%,
     rgb(102, 126, 234) 100%);
 }
+
 
 .package:nth-child(3) .package__stripe,
 .package:nth-child(3) .package__button {
