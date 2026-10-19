@@ -419,6 +419,7 @@ input, textarea {
   flex-direction: row;
   width: 100%;
   justify-content: space-between;
+  margin-bottom: 8em;
 }
 
 .package {
