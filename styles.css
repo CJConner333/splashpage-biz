@@ -357,6 +357,39 @@ input, textarea {
 
 /* Easy Steps */
 
+#easy {
+  position: relative;
+  z-index: 1;
+}
+
+.floating-video {
+  position: absolute;
+  top: -260px;
+  right: max(24px, calc((100vw - 1280px) / 2));
+  z-index: 5;
+  display: flex;
+  width: min(220px, calc(100vw - 48px));
+  margin: 0;
+  padding: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(36, 62, 99, 0.12);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(24, 43, 68, 0.28);
+}
+
+.floating-video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: 11px;
+  object-fit: cover;
+}
+
+#easy .section__title {
+  padding-right: 240px;
+}
+
 :root {
   --step-gap: 1rem;
   --step-padding: 0.75rem 1rem;
@@ -716,9 +749,10 @@ input, textarea {
   }
 
   .header__description {
-    left: 5%;
-    max-width: 90%;
-    padding: 1.5rem;
+    left: 1rem;
+    width: 50%;
+    max-width: none;
+    padding: 1.25rem;
   }
 
   .header__description h1 {
@@ -731,6 +765,17 @@ input, textarea {
 
   .container {
     padding: 2.5rem 1rem;
+  }
+
+  .floating-video {
+    top: -313px;
+    right: 1rem;
+    width: min(180px, 36vw);
+    margin: 0;
+  }
+
+  #easy .section__title {
+    padding-right: 0;
   }
 
   #easy .section__title,
@@ -764,12 +809,18 @@ input, textarea {
     padding: 0;
     margin-top: 1.5rem;
     gap: 1.5rem;
+    justify-items: center;
+  }
+
+  .package {
+    width: min(100%, 34rem);
+    max-width: 34rem;
   }
 
   .package:nth-child(3) {
     grid-column: auto;
-    width: auto;
-    justify-self: stretch;
+    width: min(100%, 34rem);
+    justify-self: center;
   }
 
   .package__bottom {
@@ -806,17 +857,24 @@ input, textarea {
   }
 
   .header__description {
-    left: 0;
-    max-width: 100%;
-    padding: 1rem;
+    left: 0.75rem;
+    width: 50%;
+    max-width: none;
+    padding: 0.75rem;
   }
 
   .header__description h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .header__description--para {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .floating-video {
+    top: -230px;
+    right: 0.75rem;
+    width: min(120px, 37vw);
   }
 
   #easy .section__title,

@@ -46,7 +46,7 @@
         </div>
     
     <figure class="header__img--wrapper">
-      <video autoplay loop muted playsinline poster="backup-image.jpg">
+      <video autoplay loop muted playsinline poster="./assets/backup-image.jpg">
         
         <source src="./assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694(1).webm" type="video/webm">
 
@@ -55,8 +55,8 @@
       </video>
     </figure>
   </div>
-  </section>
   </header>
+  </section>
 
   <!-- Modal -->
 <div class="modal" id="modal" role="dialog" aria-modal="true"
@@ -86,10 +86,15 @@
   </div>
 </div>
 
-  <script src="./script.js" defer></script>
-  </section>
-
   <section id="easy">
+  <aside class="floating-video" aria-label="Featured video">
+    <video controls playsinline preload="metadata" poster="./assets/backup-image.jpg">
+      <source src="./assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694(1).webm" type="video/webm">
+      <source src="./assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </aside>
+
   <div class="container">
     <div class="row">
       <h2 class="section__title">Easy Peasy Lemon Squeezy!</h2>
@@ -197,5 +202,6 @@
     <div class="site-footer__inner">© 2026 Splash Page United States of America</div>
   </div>
 </footer>
+  <script src="./script.js" defer></script>
   </body>
 </html>
