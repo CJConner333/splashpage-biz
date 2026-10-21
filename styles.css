@@ -374,9 +374,25 @@ input, textarea {
   overflow: hidden;
   border: 1px solid rgba(36, 62, 99, 0.12);
   border-radius: 16px;
-  background: #fff;
+  background: black;
   box-shadow: 0 12px 32px rgba(24, 43, 68, 0.28);
 }
+
+/*
+.floating-video__title {
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem;
+  border-radius: 3px;
+  background: transparent;
+  color: #fff;
+  font-size: .9rem;
+  text-align: center;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+*/
 
 .floating-video video {
   display: block;
