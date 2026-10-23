@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mogra&family=Momo+Signature&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
@@ -18,7 +18,7 @@
     <nav>
       <div class="row nav__row">
         <div class="nav__logo">
-          <img class="nav__logo--img" src="./assets/vecteezy-water-splash.svg" alt="logo">
+          <img class="nav__logo--img" src="/assets/vecteezy-water-splash.svg" alt="logo">
             <div class="nav__logo--title">Splash Page</div>
         </div>
       </div>
@@ -48,10 +48,10 @@
     <figure class="header__img--wrapper">
       <video autoplay loop muted playsinline>
         
-        <source src="./assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694(1).webm" type="video/webm">
+        <source src="/assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694(1).webm" type="video/webm">
 
-        <source src="./assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694.mp4" type="video/mp4">
-        <img src="./assets/backup-image.jpg" alt="Blue water splash">
+        <source src="/assets/Vecteezy Liquid-Motion-A-Splash-Of-Blue-Water-Against-White-Backdrop 71749694.mp4" type="video/mp4">
+        <img src="/assets/backup-image.jpg" alt="Blue water splash">
         Your browser does not support the video tag.
       </video>
     </figure>
@@ -70,12 +70,15 @@
       <button class="modal__close" aria-label="Close" data-close>&times;</button>
     </header>
 
-    <form id="modalForm" class="modal__form" novalidate>
-      <!-- form fields... -->
-      <label for="name">Name:</label><input type="text"> 
-      <label for="email">Email:</label><input type="email">
-      <label for="subject">Subject</label><input type="text">
-      <label for="request">How Can We Help?</label><textarea rows="6"></textarea>
+    <form id="modalForm" class="modal__form" action="/contact.php" method="post" novalidate>
+      <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+        <label for="company">Leave this field empty</label>
+        <input id="company" name="company" type="text" tabindex="-1" autocomplete="off">
+      </div>
+      <label for="name">Name:</label><input id="name" name="name" type="text" required>
+      <label for="email">Email:</label><input id="email" name="email" type="email" required>
+      <label for="subject">Subject</label><input id="subject" name="subject" type="text" required>
+      <label for="request">How Can We Help?</label><textarea id="request" name="message" rows="6" required></textarea>
 
       <div class="modal__actions">
         <button type="button" class="btn btn--ghost" data-close>Cancel</button>
@@ -90,9 +93,9 @@
   <section id="easy">
   <aside class="floating-video" aria-label="Featured video">
     <!-- <h2 class="floating-video__title">Why Make a Splash?</h2> -->
-    <video controls playsinline preload="metadata" poster="./assets/video-backup-img-2.png">
-      <source src="./assets/splash-page-video.webm" type="video/webm">
-      <source src="./assets/splash-page-video.mp4" type="video/mp4">
+    <video controls playsinline preload="metadata" poster="/assets/video-backup-img-2.png">
+      <source src="/assets/splash-page-video.webm" type="video/webm">
+      <source src="/assets/splash-page-video.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
   </aside>
@@ -104,7 +107,7 @@
       <div class="steps">
         <div class="step">
           <div class="step__number">
-            <img src="./assets/1-solid-full.svg" alt="Step 1">
+            <img src="/assets/1-solid-full.svg" alt="Step 1">
           </div>
           <div class="step__para">
             <p>Select your package and place your deposit</p>
@@ -113,7 +116,7 @@
 
         <div class="step">
           <div class="step__number">
-            <img src="./assets/2-solid-full.svg" alt="Step 2">
+            <img src="/assets/2-solid-full.svg" alt="Step 2">
           </div>
           <div class="step__para">
             <p>Send your logo, color, and style preferences</p>
@@ -122,7 +125,7 @@
 
         <div class="step">
           <div class="step__number">
-            <img src="./assets/3-solid-full.svg" alt="Step 3">
+            <img src="/assets/3-solid-full.svg" alt="Step 3">
           </div>
           <div class="step__para">
             <p>Finalize, approve, and go live with your Splash Page</p>
@@ -214,6 +217,6 @@
     <div class="site-footer__inner">© 2026 Splash Page United States of America</div>
   </div>
 </footer>
-  <script src="./script.js" defer></script>
+  <script src="/script.js" defer></script>
   </body>
 </html>

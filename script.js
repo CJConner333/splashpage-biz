@@ -96,24 +96,40 @@
     if (e.target === modal.querySelector('.modal__overlay')) closeModal();
   });
 
-  // Form submit example — guard in case form is missing
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
-      const data = new FormData(form);
-      // Simulate async submission
+
+      const submitButton = form.querySelector('[type="submit"]');
+      submitButton.disabled = true;
       feedback.style.color = 'black';
-      feedback.textContent = 'Sending...';
-      setTimeout(() => {
+      feedback.textContent = 'Sending your message...';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' }
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'We could not send your message. Please try again.');
+        }
+
         feedback.style.color = 'green';
-        feedback.textContent = 'Thanks! Your message was sent.';
+        feedback.textContent = 'Your message was sent. Thank you!';
         form.reset();
-        setTimeout(closeModal, 1200);
-      }, 700);
+      } catch (error) {
+        feedback.style.color = 'red';
+        feedback.textContent = error.message || 'Unable to contact the server. Please try again later.';
+      } finally {
+        submitButton.disabled = false;
+      }
     });
   }
 
