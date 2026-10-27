@@ -115,7 +115,15 @@
           body: new FormData(form),
           headers: { Accept: 'application/json' }
         });
-        const result = await response.json();
+        let result;
+        try {
+          result = JSON.parse(await response.text());
+        } catch {
+          throw new Error(
+            `The form server returned an unexpected response (HTTP ${response.status}). ` +
+            'Verify that contact.php is deployed and PHP is enabled on the host.'
+          );
+        }
 
         if (!response.ok) {
           throw new Error(result.error || 'We could not send your message. Please try again.');
