@@ -1,4 +1,4 @@
-// assets/script.js
+// script.js
 (() => {
   // Elements
   const modal = document.getElementById('modal');
