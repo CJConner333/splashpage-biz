@@ -650,6 +650,43 @@ input, textarea {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
+.package-form-panel {
+  margin: 2rem auto 0;
+  padding: 1.5rem;
+  width: min(100%, 760px);
+  border: 1px solid rgba(36, 62, 99, 0.15);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(36, 62, 99, 0.12);
+  scroll-margin-top: 1rem;
+}
+
+.package-form-panel[hidden] {
+  display: none;
+}
+
+.package-form-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.package-form-panel__header h3 {
+  margin: 0;
+}
+
+.package-form-panel__close {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  background: #f0f4f8;
+}
+
+.package-form-panel__feedback:empty {
+  display: none;
+}
+
 /* Footer */
 
 .site-footer {

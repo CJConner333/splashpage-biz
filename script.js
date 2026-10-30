@@ -7,6 +7,46 @@
   const overlayCloseEls = modal.querySelectorAll('[data-close]');
   const form = document.getElementById('modalForm');
   const feedback = document.getElementById('formFeedback');
+  const packageFormPanel = document.getElementById('package-form-panel');
+  const packageFormTitle = document.getElementById('package-form-title');
+  const packageFormFeedback = document.getElementById('package-form-feedback');
+  const cognitoFormContainer = document.getElementById('cognito-form-container');
+
+  if (packageFormPanel && packageFormTitle && packageFormFeedback && cognitoFormContainer) {
+    const packageButtons = document.querySelectorAll('.package__button[data-form]');
+    const closePackageForm = packageFormPanel.querySelector('.package-form-panel__close');
+
+    packageButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const packageName = button.closest('.package')?.querySelector('.package__name')?.textContent.trim();
+        packageFormTitle.textContent = `${packageName || 'Selected'} package order form`;
+        packageFormFeedback.textContent = '';
+        cognitoFormContainer.replaceChildren();
+        packageFormPanel.hidden = false;
+
+        const cognitoScript = document.createElement('script');
+        cognitoScript.src = 'https://www.cognitoforms.com/f/seamless.js';
+        cognitoScript.async = true;
+        cognitoScript.dataset.key = 'mgMJcx3TQEaKMg1phQodJw';
+        cognitoScript.dataset.form = button.dataset.form;
+        cognitoScript.onerror = () => {
+          packageFormFeedback.textContent = 'The order form could not be loaded. Please try again.';
+        };
+        cognitoFormContainer.appendChild(cognitoScript);
+
+        packageButtons.forEach((packageButton) => {
+          packageButton.setAttribute('aria-expanded', String(packageButton === button));
+        });
+        packageFormPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    closePackageForm.addEventListener('click', () => {
+      packageFormPanel.hidden = true;
+      cognitoFormContainer.replaceChildren();
+      packageButtons.forEach((button) => button.setAttribute('aria-expanded', 'false'));
+    });
+  }
 
   let lastFocused = null;
 
