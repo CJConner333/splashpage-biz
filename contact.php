@@ -54,19 +54,46 @@ if (
     respond(400, ['error' => 'Please check the form fields and try again.']);
 }
 
-$smtpHost = getenv('SMTP_HOST') ?: 'smtp.ipage.com';
-$smtpPort = filter_var(getenv('SMTP_PORT') ?: '465', FILTER_VALIDATE_INT, [
-    'options' => ['min_range' => 1, 'max_range' => 65535],
-]);
-$smtpUsername = getenv('SMTP_USERNAME');
-$smtpPassword = getenv('SMTP_PASSWORD');
-$smtpEncryption = strtolower(getenv('SMTP_ENCRYPTION') ?: 'ssl');
-$fromEmail = getenv('SMTP_FROM_EMAIL') ?: $smtpUsername;
+$smtpConfigPath = __DIR__ . '/../../private/smtp-config-splashpage.php';
+if (!is_file($smtpConfigPath)) {
+    error_log('Contact form SMTP configuration file is missing.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$smtpConfig = require $smtpConfigPath;
+if (
+    !is_array($smtpConfig) ||
+    !isset(
+        $smtpConfig['host'],
+        $smtpConfig['port'],
+        $smtpConfig['encryption'],
+        $smtpConfig['username'],
+        $smtpConfig['password']
+    ) ||
+    !is_string($smtpConfig['host']) ||
+    !is_int($smtpConfig['port']) ||
+    !is_string($smtpConfig['encryption']) ||
+    !is_string($smtpConfig['username']) ||
+    !is_string($smtpConfig['password']) ||
+    (isset($smtpConfig['from_email']) && !is_string($smtpConfig['from_email'])) ||
+    $smtpConfig['host'] === '' ||
+    $smtpConfig['port'] < 1 ||
+    $smtpConfig['port'] > 65535 ||
+    $smtpConfig['username'] === '' ||
+    $smtpConfig['password'] === ''
+) {
+    error_log('Contact form SMTP configuration file is invalid.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$smtpHost = $smtpConfig['host'];
+$smtpPort = $smtpConfig['port'];
+$smtpUsername = $smtpConfig['username'];
+$smtpPassword = $smtpConfig['password'];
+$smtpEncryption = strtolower($smtpConfig['encryption']);
+$fromEmail = $smtpConfig['from_email'] ?? $smtpUsername;
 
 if (
-    $smtpPort === false ||
-    $smtpUsername === false || $smtpUsername === '' ||
-    $smtpPassword === false || $smtpPassword === '' ||
     !filter_var($fromEmail, FILTER_VALIDATE_EMAIL) ||
     !in_array($smtpEncryption, ['tls', 'ssl'], true)
 ) {
