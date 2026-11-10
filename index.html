@@ -209,14 +209,21 @@ ttq.track('Purchase', {
 
        <div class="nav__links">
           <a href="#pricing" class="nav__link">Pricing</a>
+          <!--
           <button
             id="openModalBtn"
-            type="button" 
-            class="nav__link nav__link--primary" 
+            type="button"
+            class="nav__link nav__link--primary"
             data-open="modal"
             aria-controls="modal"
-            aria-expanded="false">
-            Customer Support</button/>
+            aria-expanded="false"
+          >Customer Support</button>
+          -->
+          <a
+            class="nav__link nav__link--primary"
+            href="mailto:support@splashpage.biz"
+          >Customer Support</a>
+            
        </div>
     </nav>
 
@@ -243,7 +250,9 @@ ttq.track('Purchase', {
   </header>
   </section>
 
-  <!-- Modal -->
+  
+   <!-- Modal -->
+<!--->    
 <div class="modal" id="modal" role="dialog" aria-modal="true"
      aria-hidden="true" aria-labelledby="modal-title">
   <div class="modal__overlay" data-close></div>
@@ -263,6 +272,7 @@ ttq.track('Purchase', {
       <label for="email">Email:</label><input id="email" name="email" type="email" required>
       <label for="subject">Subject</label><input id="subject" name="subject" type="text" required>
       <label for="request">How Can We Help?</label><textarea id="request" name="message" rows="6" required></textarea>
+      <div id="turnstileWidget" data-sitekey="0x4AAAAAAF08E6pLbQGATYny"></div>
 
       <div class="modal__actions">
         <button type="button" class="btn btn--ghost" data-close>Cancel</button>
@@ -273,6 +283,7 @@ ttq.track('Purchase', {
     </form>
   </div>
 </div>
+-->
 
   <section id="easy">
   <aside class="floating-video" aria-label="Featured video">

@@ -7,10 +7,72 @@
   const overlayCloseEls = modal.querySelectorAll('[data-close]');
   const form = document.getElementById('modalForm');
   const feedback = document.getElementById('formFeedback');
+  const turnstileContainer = document.getElementById('turnstileWidget');
   const packageFormPanel = document.getElementById('package-form-panel');
   const packageFormTitle = document.getElementById('package-form-title');
   const packageFormFeedback = document.getElementById('package-form-feedback');
   const cognitoFormContainer = document.getElementById('cognito-form-container');
+  let turnstileScriptPromise = null;
+  let turnstileWidgetId = null;
+  let isSubmitting = false;
+
+  function loadTurnstile() {
+    if (window.turnstile) return Promise.resolve();
+    if (turnstileScriptPromise) return turnstileScriptPromise;
+
+    turnstileScriptPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.onload = () => {
+        if (window.turnstile) resolve();
+        else reject(new Error('Turnstile did not initialize.'));
+      };
+      script.onerror = () => reject(new Error('Turnstile could not be loaded.'));
+      document.head.appendChild(script);
+    }).catch((error) => {
+      turnstileScriptPromise = null;
+      throw error;
+    });
+
+    return turnstileScriptPromise;
+  }
+
+  async function renderTurnstile() {
+    if (!turnstileContainer || turnstileWidgetId !== null) return;
+    const sitekey = turnstileContainer.dataset.sitekey;
+    if (!sitekey) {
+      feedback.textContent = 'The security check is not configured yet. Please contact us directly.';
+      feedback.style.color = 'red';
+      return;
+    }
+
+    try {
+      await loadTurnstile();
+      if (!modal.classList.contains('is-open')) return;
+      turnstileWidgetId = window.turnstile.render(turnstileContainer, {
+        sitekey,
+        'error-callback': () => {
+          feedback.textContent = 'The security check could not be completed. Please try again.';
+          feedback.style.color = 'red';
+        },
+        'expired-callback': () => {
+          feedback.textContent = 'The security check expired. Please complete it again.';
+          feedback.style.color = 'red';
+        }
+      });
+    } catch (error) {
+      feedback.textContent = 'The security check could not be loaded. Please try again later.';
+      feedback.style.color = 'red';
+      console.error(error);
+    }
+  }
+
+  function resetTurnstile() {
+    if (turnstileWidgetId !== null && window.turnstile) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  }
 
   if (packageFormPanel && packageFormTitle && packageFormFeedback && cognitoFormContainer) {
     const packageButtons = document.querySelectorAll('.package__button[data-form]');
@@ -87,6 +149,7 @@
     if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
     // Update any triggers' aria-expanded to false
     document.querySelectorAll('[data-open="modal"]').forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+    resetTurnstile();
   }
 
   function onKeyDown(e) {
@@ -125,6 +188,7 @@
       e.preventDefault();
       btn.setAttribute('aria-expanded', 'true');
       openModal(btn);
+      void renderTurnstile();
     });
   });
 
@@ -139,12 +203,21 @@
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (isSubmitting) return;
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
 
+      const token = new FormData(form).get('cf-turnstile-response');
+      if (typeof token !== 'string' || token === '') {
+        feedback.style.color = 'red';
+        feedback.textContent = 'Please complete the security check before sending your message.';
+        return;
+      }
+
       const submitButton = form.querySelector('[type="submit"]');
+      isSubmitting = true;
       submitButton.disabled = true;
       feedback.style.color = 'black';
       feedback.textContent = 'Sending your message...';
@@ -153,7 +226,9 @@
         const response = await fetch(form.action, {
           method: 'POST',
           body: new FormData(form),
-          headers: { Accept: 'application/json' }
+          headers: { Accept: 'application/json' },
+          mode: 'same-origin',
+          redirect: 'error'
         });
         let result;
         try {
@@ -177,6 +252,8 @@
         feedback.textContent = error.message || 'Unable to contact the server. Please try again later.';
       } finally {
         submitButton.disabled = false;
+        isSubmitting = false;
+        resetTurnstile();
       }
     });
   }

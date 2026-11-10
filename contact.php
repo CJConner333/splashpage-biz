@@ -32,6 +32,11 @@ foreach (['name', 'email', 'subject', 'message', 'company'] as $field) {
     }
 }
 
+$turnstileToken = $_POST['cf-turnstile-response'] ?? '';
+if (!is_string($turnstileToken) || $turnstileToken === '' || strlen($turnstileToken) > 2048) {
+    respond(400, ['error' => 'Please complete the security check and try again.']);
+}
+
 $name = trim($_POST['name'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $subject = trim($_POST['subject'] ?? '');
@@ -61,6 +66,61 @@ if (!is_file($smtpConfigPath)) {
 }
 
 $smtpConfig = require $smtpConfigPath;
+if (
+    !is_array($smtpConfig) ||
+    !isset($smtpConfig['turnstile_secret']) ||
+    !is_string($smtpConfig['turnstile_secret']) ||
+    $smtpConfig['turnstile_secret'] === ''
+) {
+    error_log('Contact form Turnstile secret is missing or invalid in SMTP configuration.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+if (!function_exists('curl_init')) {
+    error_log('Contact form Turnstile verification requires the PHP cURL extension.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$verificationRequest = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+if ($verificationRequest === false) {
+    error_log('Could not initialize the Turnstile verification request.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$verificationFields = [
+    'secret' => $smtpConfig['turnstile_secret'],
+    'response' => $turnstileToken,
+];
+if (isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])) {
+    $verificationFields['remoteip'] = $_SERVER['REMOTE_ADDR'];
+}
+
+curl_setopt_array($verificationRequest, [
+    CURLOPT_POST => true,
+    CURLOPT_POSTFIELDS => http_build_query($verificationFields),
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CONNECTTIMEOUT => 5,
+    CURLOPT_TIMEOUT => 10,
+]);
+$verificationBody = curl_exec($verificationRequest);
+$verificationStatus = curl_getinfo($verificationRequest, CURLINFO_HTTP_CODE);
+$verificationError = curl_error($verificationRequest);
+curl_close($verificationRequest);
+
+if (!is_string($verificationBody) || $verificationStatus < 200 || $verificationStatus >= 300) {
+    error_log('Turnstile verification request failed: ' . $verificationError);
+    respond(502, ['error' => 'The security check could not be verified. Please try again later.']);
+}
+
+$verificationResult = json_decode($verificationBody, true);
+if (!is_array($verificationResult) || !isset($verificationResult['success']) || !is_bool($verificationResult['success'])) {
+    error_log('Turnstile returned an invalid verification response.');
+    respond(502, ['error' => 'The security check could not be verified. Please try again later.']);
+}
+if (!$verificationResult['success']) {
+    respond(403, ['error' => 'Please complete the security check and try again.']);
+}
+
 if (
     !is_array($smtpConfig) ||
     !isset(
