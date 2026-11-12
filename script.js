@@ -52,6 +52,7 @@
       if (!modal.classList.contains('is-open')) return;
       turnstileWidgetId = window.turnstile.render(turnstileContainer, {
         sitekey,
+        action: 'contact',
         'error-callback': () => {
           feedback.textContent = 'The security check could not be completed. Please try again.';
           feedback.style.color = 'red';
@@ -226,14 +227,27 @@
         const response = await fetch(form.action, {
           method: 'POST',
           body: new FormData(form),
-          headers: { Accept: 'application/json' },
-          mode: 'same-origin',
-          redirect: 'error'
+          headers: { Accept: 'application/json' }
         });
+        const responseText = await response.text();
         let result;
         try {
-          result = JSON.parse(await response.text());
+          result = JSON.parse(responseText);
         } catch {
+          console.error('Contact form returned a non-JSON response.', {
+            status: response.status,
+            contentType: response.headers.get('content-type'),
+            response: responseText.slice(0, 2000)
+          });
+          if (
+            response.status === 409 &&
+            /document\.cookie\s*=\s*["']humans_[^"']+=1["']/i.test(responseText)
+          ) {
+            throw new Error(
+              'The hosting provider blocked this form submission with a security challenge. ' +
+              'Please contact us at support@splashpage.biz while we resolve it.'
+            );
+          }
           throw new Error(
             `The form server returned an unexpected response (HTTP ${response.status}). ` +
             'Verify that contact.php is deployed and PHP is enabled on the host.'

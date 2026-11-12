@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 
-use PHPMailer\PHPMailer\PHPMailer;
-
 header('Content-Type: application/json; charset=utf-8');
 
 function respond(int $status, array $payload): void
@@ -12,21 +10,12 @@ function respond(int $status, array $payload): void
     exit;
 }
 
-$phpMailerPath = __DIR__ . '/PHPMailer-7.1.1/src/';
-foreach (['Exception.php', 'PHPMailer.php', 'SMTP.php'] as $phpMailerFile) {
-    if (!is_file($phpMailerPath . $phpMailerFile)) {
-        error_log('Contact form email dependencies are missing.');
-        respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
-    }
-    require_once $phpMailerPath . $phpMailerFile;
-}
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Allow: POST');
     respond(405, ['error' => 'Method not allowed.']);
 }
 
-foreach (['name', 'email', 'subject', 'message', 'company'] as $field) {
+foreach (['name', 'email', 'subject', 'message', 'company', 'cf-turnstile-response'] as $field) {
     if (isset($_POST[$field]) && !is_string($_POST[$field])) {
         respond(400, ['error' => 'Please check the form fields and try again.']);
     }
@@ -59,21 +48,41 @@ if (
     respond(400, ['error' => 'Please check the form fields and try again.']);
 }
 
-$smtpConfigPath = __DIR__ . '/../../private/smtp-config-splashpage.php';
-if (!is_file($smtpConfigPath)) {
-    error_log('Contact form SMTP configuration file is missing.');
+$turnstileConfigPath = dirname(__DIR__, 2) . '/private/turnstile-splashpage-config.php';
+if (!is_file($turnstileConfigPath)) {
+    error_log('Contact form Turnstile configuration file is missing.');
     respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
 }
 
-$smtpConfig = require $smtpConfigPath;
-if (
-    !is_array($smtpConfig) ||
-    !isset($smtpConfig['turnstile_secret']) ||
-    !is_string($smtpConfig['turnstile_secret']) ||
-    $smtpConfig['turnstile_secret'] === ''
-) {
-    error_log('Contact form Turnstile secret is missing or invalid in SMTP configuration.');
+try {
+    $turnstileConfig = require $turnstileConfigPath;
+} catch (\ParseError $error) {
+    error_log('Contact form Turnstile configuration has a PHP syntax error: ' . $error->getMessage());
     respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+if (!is_array($turnstileConfig)) {
+    error_log('Contact form Turnstile configuration is invalid.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$turnstileSecret = $turnstileConfig['turnstile_secret'] ?? null;
+$configuredHostnames = $turnstileConfig['turnstile_hostnames'] ?? null;
+if (
+    !is_string($turnstileSecret) || $turnstileSecret === '' ||
+    !is_array($configuredHostnames) || $configuredHostnames === []
+) {
+    error_log('Contact form Turnstile configuration is missing or invalid.');
+    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+}
+
+$turnstileHostnames = [];
+foreach ($configuredHostnames as $hostname) {
+    if (!is_string($hostname) || trim($hostname) === '') {
+        error_log('Contact form Turnstile hostname configuration is invalid.');
+        respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
+    }
+    $turnstileHostnames[] = strtolower(trim($hostname));
 }
 
 if (!function_exists('curl_init')) {
@@ -81,87 +90,59 @@ if (!function_exists('curl_init')) {
     respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
 }
 
-$verificationRequest = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
-if ($verificationRequest === false) {
+$verificationFields = [
+    'secret' => $turnstileSecret,
+    'response' => $turnstileToken,
+];
+if (isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])) {
+    $remoteIp = filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP);
+    if ($remoteIp !== false) {
+        $verificationFields['remoteip'] = $remoteIp;
+    }
+}
+
+$curl = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+if ($curl === false) {
     error_log('Could not initialize the Turnstile verification request.');
     respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
 }
 
-$verificationFields = [
-    'secret' => $smtpConfig['turnstile_secret'],
-    'response' => $turnstileToken,
-];
-if (isset($_SERVER['REMOTE_ADDR']) && is_string($_SERVER['REMOTE_ADDR'])) {
-    $verificationFields['remoteip'] = $_SERVER['REMOTE_ADDR'];
-}
-
-curl_setopt_array($verificationRequest, [
+curl_setopt_array($curl, [
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => http_build_query($verificationFields),
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_CONNECTTIMEOUT => 5,
     CURLOPT_TIMEOUT => 10,
+    CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
 ]);
-$verificationBody = curl_exec($verificationRequest);
-$verificationStatus = curl_getinfo($verificationRequest, CURLINFO_HTTP_CODE);
-$verificationError = curl_error($verificationRequest);
-curl_close($verificationRequest);
+$verificationBody = curl_exec($curl);
+$verificationStatus = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+$verificationError = curl_error($curl);
+curl_close($curl);
 
-if (!is_string($verificationBody) || $verificationStatus < 200 || $verificationStatus >= 300) {
+if ($verificationBody === false || $verificationStatus < 200 || $verificationStatus >= 300) {
     error_log('Turnstile verification request failed: ' . $verificationError);
     respond(502, ['error' => 'The security check could not be verified. Please try again later.']);
 }
 
 $verificationResult = json_decode($verificationBody, true);
-if (!is_array($verificationResult) || !isset($verificationResult['success']) || !is_bool($verificationResult['success'])) {
+if (
+    !is_array($verificationResult) ||
+    ($verificationResult['success'] ?? false) !== true ||
+    ($verificationResult['action'] ?? null) !== 'contact' ||
+    !is_string($verificationResult['hostname'] ?? null) ||
+    !in_array(strtolower($verificationResult['hostname']), $turnstileHostnames, true)
+) {
     error_log('Turnstile returned an invalid verification response.');
-    respond(502, ['error' => 'The security check could not be verified. Please try again later.']);
-}
-if (!$verificationResult['success']) {
     respond(403, ['error' => 'Please complete the security check and try again.']);
 }
 
-if (
-    !is_array($smtpConfig) ||
-    !isset(
-        $smtpConfig['host'],
-        $smtpConfig['port'],
-        $smtpConfig['encryption'],
-        $smtpConfig['username'],
-        $smtpConfig['password']
-    ) ||
-    !is_string($smtpConfig['host']) ||
-    !is_int($smtpConfig['port']) ||
-    !is_string($smtpConfig['encryption']) ||
-    !is_string($smtpConfig['username']) ||
-    !is_string($smtpConfig['password']) ||
-    (isset($smtpConfig['from_email']) && !is_string($smtpConfig['from_email'])) ||
-    $smtpConfig['host'] === '' ||
-    $smtpConfig['port'] < 1 ||
-    $smtpConfig['port'] > 65535 ||
-    $smtpConfig['username'] === '' ||
-    $smtpConfig['password'] === ''
-) {
-    error_log('Contact form SMTP configuration file is invalid.');
+if (!function_exists('mail')) {
+    error_log('Contact form email requires PHP mail().');
     respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
 }
 
-$smtpHost = $smtpConfig['host'];
-$smtpPort = $smtpConfig['port'];
-$smtpUsername = $smtpConfig['username'];
-$smtpPassword = $smtpConfig['password'];
-$smtpEncryption = strtolower($smtpConfig['encryption']);
-$fromEmail = $smtpConfig['from_email'] ?? $smtpUsername;
-
-if (
-    !filter_var($fromEmail, FILTER_VALIDATE_EMAIL) ||
-    !in_array($smtpEncryption, ['tls', 'ssl'], true)
-) {
-    error_log('Contact form SMTP settings are missing or invalid.');
-    respond(500, ['error' => 'The contact form is not configured correctly. Please try again later.']);
-}
-
-$mailBody = implode("\n", [
+$mailBody = implode("\r\n", [
     'Name: ' . $name,
     'Email: ' . $email,
     'Subject: ' . $subject,
@@ -169,28 +150,54 @@ $mailBody = implode("\n", [
     'Message:',
     $message,
 ]);
-$mail = new PHPMailer(true);
+$subjectCharacters = preg_split('//u', 'Website contact: ' . $subject, -1, PREG_SPLIT_NO_EMPTY);
+if ($subjectCharacters === false) {
+    respond(400, ['error' => 'Please check the form fields and try again.']);
+}
 
+$mailSubjectParts = [];
+$subjectPart = '';
+foreach ($subjectCharacters as $character) {
+    if ($subjectPart !== '' && strlen($subjectPart) + strlen($character) > 42) {
+        $mailSubjectParts[] = '=?UTF-8?B?' . base64_encode($subjectPart) . '?=';
+        $subjectPart = '';
+    }
+    $subjectPart .= $character;
+}
+if ($subjectPart !== '') {
+    $mailSubjectParts[] = '=?UTF-8?B?' . base64_encode($subjectPart) . '?=';
+}
+$mailSubject = implode(' ', $mailSubjectParts);
+$mailHeaders = implode("\r\n", [
+    'From: support@splashpage.biz',
+    'Reply-To: ' . $email,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+]);
+
+$mailError = null;
+$mailSent = false;
+set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+});
 try {
-    $mail->isSMTP();
-    $mail->Host = $smtpHost;
-    $mail->SMTPAuth = true;
-    $mail->Username = $smtpUsername;
-    $mail->Password = $smtpPassword;
-    $mail->Port = $smtpPort;
-    $mail->SMTPSecure = $smtpEncryption === 'ssl'
-        ? PHPMailer::ENCRYPTION_SMTPS
-        : PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->CharSet = PHPMailer::CHARSET_UTF8;
-    $mail->Timeout = 15;
-    $mail->setFrom($fromEmail, 'Splash Page Website');
-    $mail->addAddress('support@splashpage.biz');
-    $mail->addReplyTo($email, $name);
-    $mail->Subject = 'Website contact: ' . $subject;
-    $mail->Body = $mailBody;
-    $mail->send();
+    $mailSent = mail('support@splashpage.biz', $mailSubject, $mailBody, $mailHeaders);
 } catch (\Throwable $error) {
-    error_log('Contact form SMTP error: ' . $error->getMessage());
+    $mailError = $error;
+} finally {
+    restore_error_handler();
+}
+
+if ($mailError !== null) {
+    error_log('Contact form mail() error: ' . $mailError->getMessage());
+    respond(500, ['error' => 'We could not send your message right now. Please try again later.']);
+}
+if (!$mailSent) {
+    error_log('Contact form mail() returned false.');
     respond(500, ['error' => 'We could not send your message right now. Please try again later.']);
 }
 

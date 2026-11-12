@@ -1,48 +1,42 @@
 # Contact form email setup
 
-The contact form uses the bundled PHPMailer source in `PHPMailer-7.1.1/` and sends through authenticated SMTP. Keep that directory alongside `contact.php` when deploying.
+The contact form sends email with PHP's built-in `mail()` function. The web host must have its PHP mail transport configured. PHPMailer is not required.
 
-Store the SMTP login in a PHP configuration file outside `public_html`. For this deployment layout, place the configuration file here:
+Store the Turnstile settings in a PHP configuration file outside the website folder. For the hosting layout, place it here:
 
 ```text
 account-root/
 ├── private/
-│   └── smtp-config-splashpage.php
+│   └── turnstile-splashpage-config.php
 └── public_html/
     └── splashpage-biz/
-        ├── contact.php
-        └── PHPMailer-7.1.1/
+        └── contact.php
 ```
 
-In this layout, `contact.php` loads `../../private/smtp-config-splashpage.php`, which resolves to `account-root/private/smtp-config-splashpage.php`. If you deploy `contact.php` in a different directory depth, update that relative path in `contact.php` accordingly.
+`contact.php` loads `dirname(__DIR__, 2) . '/private/turnstile-splashpage-config.php'`, matching the working Claws deployment path. If your hosting directory layout differs, update that path accordingly.
 
-Create `private/smtp-config-splashpage.php` with the following contents:
+The file should contain only the Turnstile settings:
 
 ```php
 <?php
 return [
-    'host' => 'smtp.ipage.com',
-    'port' => 465,
-    'encryption' => 'ssl',
-    'username' => 'your-full-email-address@splashpage.biz',
-    'password' => 'your-mailbox-password',
-    'from_email' => 'your-full-email-address@splashpage.biz',
     'turnstile_secret' => 'your-turnstile-secret-key',
+    'turnstile_hostnames' => ['splashpage.biz'],
 ];
 ```
 
-`from_email` must be a sender address authorized by the SMTP provider; it can be omitted to use the SMTP username. Keep the real credentials out of source control and restrict access to this file using your host's file permissions.
+Keep the real secret out of source control and restrict access to this file using your host's file permissions. Contact emails are sent from `support@splashpage.biz` to `support@splashpage.biz`; customer replies go to the submitter's address.
 
-This Markdown file is documentation only; PHP/PHPMailer does not load it. The PHP configuration file containing the SMTP credentials is required at runtime.
+This Markdown file is documentation only; `contact.php` requires the PHP configuration file at runtime. PHP `mail()` returning success means the message was accepted for delivery, not necessarily delivered to the recipient.
 
-The endpoint sends messages to `support@splashpage.biz` and sets the submitter's address as the reply-to address. The configured SMTP account must be permitted to send from `from_email`.
+The endpoint sends messages to `support@splashpage.biz` and sets the submitter's address as the reply-to address.
 
 ## Cloudflare Turnstile
 
 The contact form also requires a Cloudflare Turnstile verification. Create a Turnstile widget for the domains where this site is hosted.
 
-The Turnstile site key is configured in the `data-sitekey` attribute of the widget in `index.html`; the provided site key is already in place. Add the matching Turnstile secret as `turnstile_secret` in the same private SMTP configuration file. Keep the secret private and out of source control. `contact.php` verifies every submitted token with Cloudflare's Siteverify API before sending email; the server must have PHP's cURL extension enabled. The site key and secret must belong to the same Turnstile widget.
+The Turnstile site key is configured in the `data-sitekey` attribute of the widget in `index.html`; the provided site key is already in place. Add the matching Turnstile secret as `turnstile_secret` and the allowed hostnames as `turnstile_hostnames` in `turnstile-splashpage-config.php`. Keep the secret private and out of source control. The browser submits the `contact` action, and `contact.php` verifies the token, action, and hostname with Cloudflare's Siteverify API before sending email. The server must have PHP's cURL extension enabled. The site key and secret must belong to the same Turnstile widget.
 
 The browser loads `contact.php` only when the visitor submits the form; it is not called when `index.html` loads. `script.js` sends the submission as a same-origin request and keeps the visitor on the page. It also ignores duplicate submissions and treats redirects as errors rather than following a host challenge page. Do not preload `contact.php` or use a rewrite to bypass a hosting-provider bot challenge.
 
-If submitting the form navigates to `contact.php` or displays a host challenge, check the browser console and Network panel: a normal submission should be a single POST to `contact.php` from the form submit. If JavaScript did not handle it, the browser's native form fallback will navigate to the endpoint; if the request was handled by JavaScript, check its HTTP status and response for a host/WAF block or redirect. Ask the hosting provider to review the matching access/WAF log entry and allow the legitimate same-origin form POST while keeping the server-side Turnstile verification enabled.
+If the form request returns HTTP 409 with a response such as `<script>document.cookie = "humans_...=1"; document.location.reload(true)</script>`, the hosting provider's bot-protection layer is intercepting the POST before `contact.php` can process it. This JavaScript challenge is not a response from PHP or Cloudflare Turnstile, and it cannot complete inside the form's `fetch()` request. Ask the hosting provider to review the matching access/WAF log entry and exempt the legitimate same-origin POST to `/contact.php` from this injected challenge. Keep the server-side Turnstile verification enabled; do not disable bot protection site-wide or bypass Turnstile.

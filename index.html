@@ -80,10 +80,27 @@
 
     <!-- TikTok Pixel Code -->
     <script>
-      !function (w, d, t) {
+      !(function (w, d, t) {
         w.TiktokAnalyticsObject = t;
-        var ttq = w[t] = w[t] || [];
-        ttq.methods = ["page", "track", "identify", "instances", "debug", "on", "off", "once", "ready", "alias", "group", "enableCookie", "disableCookie", "holdConsent", "revokeConsent", "grantConsent"];
+        var ttq = (w[t] = w[t] || []);
+        ttq.methods = [
+          "page",
+          "track",
+          "identify",
+          "instances",
+          "debug",
+          "on",
+          "off",
+          "once",
+          "ready",
+          "alias",
+          "group",
+          "enableCookie",
+          "disableCookie",
+          "holdConsent",
+          "revokeConsent",
+          "grantConsent",
+        ];
         ttq.setAndDefer = function (t, e) {
           t[e] = function () {
             t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
@@ -110,31 +127,7 @@
         };
         ttq.load("DBHO323C77UFSQ3BTHP0");
         ttq.page();
-      }(window, document, "ttq");
-
-
-      	"contents": [
-      		{
-      			"content_id": "<content_identifier>", // string. ID of the product. Example: "1077218".
-      			"content_type": "<content_type>", // string. Either product or product_group.
-      			"content_name": "<content_name>" // string. The name of the page or product. Example: "shirt".
-      		}
-      	],
-      	"value": "<content_value>", // number. Value of the order or items sold. Example: 100.
-      	"currency": "<content_currency>" // string. The 4217 currency code. Example: "USD".
-      });
-
-      ttq.track('Purchase', {
-      	"contents": [
-      		{
-      			"content_id": "<content_identifier>", // string. ID of the product. Example: "1077218".
-      			"content_type": "<content_type>", // string. Either product or product_group.
-      			"content_name": "<content_name>" // string. The name of the page or product. Example: "shirt".
-      		}
-      	],
-      	"value": "<content_value>", // number. Value of the order or items sold. Example: 100.
-      	"currency": "<content_currency>" // string. The 4217 currency code. Example: "USD".
-      });
+      })(window, document, "ttq");
     </script>
   </head>
 
@@ -154,7 +147,7 @@
 
         <div class="nav__links">
           <a href="#pricing" class="nav__link">Pricing</a>
-          
+
           <button
             id="openModalBtn"
             type="button"
@@ -162,13 +155,9 @@
             data-open="modal"
             aria-controls="modal"
             aria-expanded="false"
-          >Customer Support</button>
-        
-          <a
-            class="nav__link nav__link--primary"
-            href="mailto:support@splashpage.biz"
-            >Customer Support</a
           >
+            Customer Support
+          </button>
         </div>
       </nav>
 
@@ -200,40 +189,75 @@
       </header>
     </section>
 
-    /* Modal for customer support form */
-   
-<div class="modal" id="modal" role="dialog" aria-modal="true"
-     aria-hidden="true" aria-labelledby="modal-title">
-  <div class="modal__overlay" data-close></div>
+    <div
+      class="modal"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="modal-title"
+    >
+      <div class="modal__overlay" data-close></div>
 
-  <div class="modal__dialog" role="document" tabindex="-1">
-    <header class="modal__header">
-      <h2 id="modal-title">Send us a message</h2>
-      <button class="modal__close" aria-label="Close" data-close>&times;</button>
-    </header>
+      <div class="modal__dialog" role="document" tabindex="-1">
+        <header class="modal__header">
+          <h2 id="modal-title">Send us a message</h2>
+          <button class="modal__close" aria-label="Close" data-close>
+            &times;
+          </button>
+        </header>
 
-    <form id="modalForm" class="modal__form" action="contact.php" method="post" novalidate>
-      <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
-        <label for="company">Leave this field empty</label>
-        <input id="company" name="company" type="text" tabindex="-1" autocomplete="off">
+        <form
+          id="modalForm"
+          class="modal__form"
+          action="contact.php"
+          method="post"
+          novalidate
+        >
+          <div
+            aria-hidden="true"
+            style="
+              position: absolute;
+              left: -10000px;
+              width: 1px;
+              height: 1px;
+              overflow: hidden;
+            "
+          >
+            <label for="company">Leave this field empty</label>
+            <input
+              id="company"
+              name="company"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+          <label for="name">Name:</label
+          ><input id="name" name="name" type="text" required />
+          <label for="email">Email:</label
+          ><input id="email" name="email" type="email" required />
+          <label for="subject">Subject</label
+          ><input id="subject" name="subject" type="text" required />
+          <label for="request">How Can We Help?</label
+          ><textarea id="request" name="message" rows="6" required></textarea>
+          <div
+            id="turnstileWidget"
+            class="cf-turnstile"
+            data-sitekey="0x4AAAAAAF08E6pLbQGATYny"
+          ></div>
+
+          <div class="modal__actions">
+            <button type="button" class="btn btn--ghost" data-close>
+              Cancel
+            </button>
+            <button type="submit" class="btn">Send</button>
+          </div>
+
+          <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
+        </form>
       </div>
-      <label for="name">Name:</label><input id="name" name="name" type="text" required>
-      <label for="email">Email:</label><input id="email" name="email" type="email" required>
-      <label for="subject">Subject</label><input id="subject" name="subject" type="text" required>
-      <label for="request">How Can We Help?</label><textarea id="request" name="message" rows="6" required></textarea>
-      <div id="turnstileWidget" data-sitekey="0x4AAAAAAF08E6pLbQGATYny"></div>
-
-      <div class="modal__actions">
-        <button type="button" class="btn btn--ghost" data-close>Cancel</button>
-        <button type="submit" class="btn">Send</button>
-      </div>
-
-      <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
-    </form>
-  </div>
-</div>
--->
-
+    </div>
     <section id="easy">
       <aside class="floating-video" aria-label="Featured video">
         <!-- <h2 class="floating-video__title">Why Make a Splash?</h2> -->
