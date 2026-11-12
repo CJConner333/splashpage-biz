@@ -67,7 +67,7 @@
       }
     </script>
 
-    <script src="script.js" defer></script>
+    <script src="script.js?v=20261111-hidden-frame" defer></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -212,6 +212,7 @@
           class="modal__form"
           action="contact.php"
           method="post"
+          target="contactFormResponse"
           novalidate
         >
           <div
@@ -245,6 +246,7 @@
             id="turnstileWidget"
             class="cf-turnstile"
             data-sitekey="0x4AAAAAAF9kXCdDJ3odyOZp"
+            data-action="contact"
           ></div>
 
           <div class="modal__actions">
@@ -256,6 +258,11 @@
 
           <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
         </form>
+        <iframe
+          name="contactFormResponse"
+          title="Contact form response"
+          hidden
+        ></iframe>
       </div>
     </div>
     <section id="easy">

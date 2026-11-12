@@ -1,11 +1,26 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: application/json; charset=utf-8');
-
 function respond(int $status, array $payload): void
 {
     http_response_code($status);
+
+    $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+    if (strpos($accept, 'text/html') !== false && strpos($accept, 'application/json') === false) {
+        header('Content-Type: text/html; charset=utf-8');
+        $isSuccess = $status >= 200 && $status < 300;
+        $title = $isSuccess ? 'Message sent' : 'Unable to send message';
+        $message = $payload['message'] ?? $payload['error'] ?? 'Please try again later.';
+        $safeTitle = htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeMessage = htmlspecialchars((string) $message, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $responseStatus = $isSuccess ? 'success' : 'error';
+        echo '<!doctype html><html lang="en" data-contact-status="' . $responseStatus . '">';
+        echo '<head><meta charset="utf-8"><title>' . $safeTitle . '</title></head><body>';
+        echo '<p data-contact-message>' . $safeMessage . '</p></body></html>';
+        exit;
+    }
+
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode($payload);
     exit;
 }

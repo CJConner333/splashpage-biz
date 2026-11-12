@@ -7,6 +7,7 @@
   const overlayCloseEls = modal.querySelectorAll('[data-close]');
   const form = document.getElementById('modalForm');
   const feedback = document.getElementById('formFeedback');
+  const formResponseFrame = document.querySelector('iframe[name="contactFormResponse"]');
   const turnstileContainer = document.getElementById('turnstileWidget');
   const packageFormPanel = document.getElementById('package-form-panel');
   const packageFormTitle = document.getElementById('package-form-title');
@@ -15,6 +16,7 @@
   let turnstileScriptPromise = null;
   let turnstileWidgetId = null;
   let isSubmitting = false;
+  let submissionTimeout = null;
 
   function loadTurnstile() {
     if (window.turnstile) return Promise.resolve();
@@ -202,16 +204,42 @@
   });
 
   if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (isSubmitting) return;
+    formResponseFrame?.addEventListener('load', () => {
+      if (!isSubmitting) return;
+
+      let responseDocument;
+      try {
+        responseDocument = formResponseFrame.contentDocument;
+      } catch (error) {
+        console.error('Could not read the contact form response frame.', error);
+        finishSubmission('We could not read the server response. Please try again.');
+        return;
+      }
+
+      const status = responseDocument?.documentElement?.dataset.contactStatus;
+      if (status !== 'success' && status !== 'error') return;
+
+      const message = responseDocument.querySelector('[data-contact-message]')?.textContent;
+      finishSubmission(
+        message || 'We could not read the server response. Please try again.',
+        status === 'success'
+      );
+    });
+
+    form.addEventListener('submit', (e) => {
+      if (isSubmitting) {
+        e.preventDefault();
+        return;
+      }
       if (!form.checkValidity()) {
+        e.preventDefault();
         form.reportValidity();
         return;
       }
 
       const token = new FormData(form).get('cf-turnstile-response');
       if (typeof token !== 'string' || token === '') {
+        e.preventDefault();
         feedback.style.color = 'red';
         feedback.textContent = 'Please complete the security check before sending your message.';
         return;
@@ -222,54 +250,24 @@
       submitButton.disabled = true;
       feedback.style.color = 'black';
       feedback.textContent = 'Sending your message...';
-
-      try {
-        const response = await fetch(form.action, {
-          method: 'POST',
-          body: new FormData(form),
-          headers: { Accept: 'application/json' }
-        });
-        const responseText = await response.text();
-        let result;
-        try {
-          result = JSON.parse(responseText);
-        } catch {
-          console.error('Contact form returned a non-JSON response.', {
-            status: response.status,
-            contentType: response.headers.get('content-type'),
-            response: responseText.slice(0, 2000)
-          });
-          if (
-            response.status === 409 &&
-            /document\.cookie\s*=\s*["']humans_[^"']+=1["']/i.test(responseText)
-          ) {
-            throw new Error(
-              'The hosting provider blocked this form submission with a security challenge. ' +
-              'Please contact us at support@splashpage.biz while we resolve it.'
-            );
-          }
-          throw new Error(
-            `The form server returned an unexpected response (HTTP ${response.status}). ` +
-            'Verify that contact.php is deployed and PHP is enabled on the host.'
-          );
-        }
-
-        if (!response.ok) {
-          throw new Error(result.error || 'We could not send your message. Please try again.');
-        }
-
-        feedback.style.color = 'green';
-        feedback.textContent = 'Your message was sent. Thank you!';
-        form.reset();
-      } catch (error) {
-        feedback.style.color = 'red';
-        feedback.textContent = error.message || 'Unable to contact the server. Please try again later.';
-      } finally {
-        submitButton.disabled = false;
-        isSubmitting = false;
-        resetTurnstile();
-      }
+      submissionTimeout = window.setTimeout(() => {
+        finishSubmission('The server did not respond in time. Please try again.');
+      }, 60000);
     });
+  }
+
+  function finishSubmission(message, succeeded = false) {
+    const submitButton = form?.querySelector('[type="submit"]');
+    if (submissionTimeout !== null) {
+      window.clearTimeout(submissionTimeout);
+      submissionTimeout = null;
+    }
+    if (succeeded) form.reset();
+    feedback.style.color = succeeded ? 'green' : 'red';
+    feedback.textContent = message;
+    isSubmitting = false;
+    if (submitButton) submitButton.disabled = false;
+    resetTurnstile();
   }
 
   // Prevent clicks inside dialog from closing
